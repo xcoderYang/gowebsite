@@ -11,7 +11,7 @@ type Percolation struct {
 
 func Percolation_init(n int, p float64) Percolation {
 	var per Percolation
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	per.matrix = make([][]int, n)
 	for i, _ := range per.matrix {
 		per.matrix[i] = make([]int, n)
@@ -23,6 +23,7 @@ func Percolation_init(n int, p float64) Percolation {
 			}
 		}
 	}
+
 	return per
 }
 func (per Percolation) GetMatrix() [][]int {

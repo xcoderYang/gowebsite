@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 	"union_find/application"
 )
 
@@ -17,17 +18,51 @@ import (
 **/
 
 func main() {
-	const n = 5
-	var pers = application.Percolation_init(n, 0.593)
-	var matrix = pers.GetMatrix()
-	for i, _ := range matrix {
-		fmt.Println(matrix[i])
+	const n = 1000
+	const count = 1000
+	const wcount = 10
+	const p = 0.592746
+	var index2 = 0
+	for index2 < wcount {
+		var p_shark = 0
+		var index = 0
+		for index < count {
+			time.Sleep(5 * time.Millisecond)
+			if quick_union_test(n, p) {
+				p_shark++
+			}
+			index++
+		}
+		fmt.Println(float64(p_shark) / float64(count))
+		index2++
 	}
-	var qu = quick_union_improve_compress_application_init(8)
+
+	// var qf = quick_union_improve_compress_init(10)
+	// qf.union(4, 3)
+	// qf.union(3, 8)
+	// qf.union(6, 5)
+	// qf.union(9, 4)
+	// qf.union(2, 1)
+	// qf.union(5, 0)
+
+	// qf.union(7, 2)
+	// qf.union(6, 1)
+	// qf.union(7, 3)
+
+	// fmt.Println(qf.connected(0, 7))
+	// fmt.Println(qf.connected(8, 9))
+	// fmt.Println(qf.connected(5, 4))
+	// fmt.Println(qf.id)
+}
+
+func quick_union_test(n int, p float64) bool {
+	var pers = application.Percolation_init(n, p)
+	var matrix = pers.GetMatrix()
+	var qu = quick_union_improve_compress_application_init(n)
 
 	for i, _ := range matrix {
 		for j, _ := range matrix[i] {
-			fmt.Println(i, j)
+			// fmt.Println(i, j)
 			if matrix[i][j] == 0 {
 				if i == 0 {
 					qu.union(j, 0)
@@ -50,35 +85,19 @@ func main() {
 			}
 		}
 	}
-	fmt.Println(qu.connected(0, n*n-1))
-	i := 0
-	j := 0
-	for i < n {
-		j = 0
-		for j < n {
-			fmt.Print(qu.id[i*n+j], " ")
-			j++
-		}
-		fmt.Println("")
-		i++
-	}
-
-	// var qf = quick_union_improve_compress_init(10)
-	// qf.union(4, 3)
-	// qf.union(3, 8)
-	// qf.union(6, 5)
-	// qf.union(9, 4)
-	// qf.union(2, 1)
-	// qf.union(5, 0)
-
-	// qf.union(7, 2)
-	// qf.union(6, 1)
-	// qf.union(7, 3)
-
-	// fmt.Println(qf.connected(0, 7))
-	// fmt.Println(qf.connected(8, 9))
-	// fmt.Println(qf.connected(5, 4))
-	// fmt.Println(qf.id)
+	// fmt.Println(qu.connected(0, n*n-1))
+	return qu.connected(0, n*n-1)
+	// i := 0
+	// j := 0
+	// for i < n {
+	// 	j = 0
+	// 	for j < n {
+	// 		fmt.Print(qu.id[i*n+j], " ")
+	// 		j++
+	// 	}
+	// 	fmt.Println("")
+	// 	i++
+	// }
 }
 
 type quick_union_improve_compress_application struct {
@@ -91,8 +110,6 @@ func quick_union_improve_compress_application_init(n int) quick_union_improve_co
 	var qu quick_union_improve_compress_application
 	qu.id = make([]int, n*n)
 	qu.sz = make([]int, n*n)
-	// 第一排的节点的 root都指向的一个元素
-	// 最后一排节点的 root都指向最后一个元素
 	for index < n*n {
 		qu.id[index] = index
 		qu.sz[index] = 1
