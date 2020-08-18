@@ -23,7 +23,6 @@ func Percolation_init(n int, p float64) Percolation {
 			}
 		}
 	}
-
 	return per
 }
 func (per Percolation) GetMatrix() [][]int {
