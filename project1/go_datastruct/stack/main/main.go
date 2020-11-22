@@ -1,15 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 func main() {
 
 	// 栈的应用，执行 ( 1 + ( ( 2 + 3 ) * ( 4 * 5 ) ) )
-	// fmt.Println(stackCompute("1+(((2+3)*(4*5))/5)-5)"))
+	fmt.Println(stackCompute("3+2*2"))
 	// a := (1 + ((2+3)*(4*5))/10)
-	a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	testArr(a)
-	fmt.Println(a)
+	// a := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	// testArr(a)
+	// fmt.Println(a)
 }
 
 func testArr(arr []int) {
@@ -21,9 +24,19 @@ func stackCompute(str string) int {
 		vsk  stackLink
 		opsk stackLink
 	)
-	for _, v := range str {
+	index := 0
+	for index < len(str) {
+		v := str[index]
 		if v <= '9' && v >= '0' {
-			vsk.push(int(v) - '0')
+			i := index
+			for str[i] <= '9' && str[i] >= '0' {
+				i++
+			}
+			num := string(str[index:i])
+			index = i - 1
+			number, _ := strconv.ParseInt(num, 10, 64)
+			fmt.Println(number)
+			vsk.push(int(number))
 		} else if v == '+' || v == '-' || v == '*' || v == '/' {
 			opsk.push(int(v))
 		} else if v == ')' {
@@ -43,6 +56,7 @@ func stackCompute(str string) int {
 			}
 			vsk.push(int(ans))
 		}
+		index++
 	}
 	for !opsk.isEmpty() {
 		n1 := vsk.pop().(int)
