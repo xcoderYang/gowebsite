@@ -2,17 +2,19 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sort"
+	"strconv"
 )
 
 type MyCalendar struct {
 	cache []map[string]int
 }
 
-func Constructor() MyCalendar {
-	var calender MyCalendar
-	return calender
-}
+//func Constructor() MyCalendar {
+//	var calender MyCalendar
+//	return calender
+//}
 
 func (this *MyCalendar) Book(start int, end int) bool {
 	todo := make(map[string]int)
@@ -42,7 +44,425 @@ func (this *MyCalendar) Book(start int, end int) bool {
 }
 
 func main() {
-	fmt.Println(findRepeatedDnaSequences("AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"))
+	//gameOfLife([][]int{
+	//	{0,1,0},
+	//	{0,0,1},
+	//	{1,1,1},
+	//	{0,0,0},
+	//})
+	//fmt.Println(getHint("1123","0111"))
+	//fmt.Println(maximumSwap(1993))
+	//fmt.Println(math.pi)
+	fmt.Println(canFinish(4,[][]int{
+		{3,2},
+		{2,1},
+		{1,0},
+		{0,3},
+	}))
+}
+
+func canFinish(numCourses int, prerequisites [][]int) bool {
+	course:=make([][]int, numCourses)
+	for i:=0; i<numCourses; i++{
+		course[i] = make([]int,0)
+	}
+	for i := 0; i<len(prerequisites); i++{
+		// to   表示目的
+		// from 表示先决条件
+		to := prerequisites[i][0]
+		from := prerequisites[i][1]
+		course[from] = append(course[from], to)
+	}
+	for{
+		node:=-1
+		for i:=0; i<numCourses; i++{
+			if len(course[i]) == 0{
+				node = i
+				course[i] = append(course[i], -1)
+				break
+			}else if course[i][0] == -1{
+				continue
+			}
+		}
+		if node == -1{	
+			break
+		}
+		for i:=0; i<numCourses; i++{
+			j:=0
+			for j<len(course[i]){
+				if course[i][j] == node{
+					course[i] = append(course[i][:j], course[i][j+1:]...)
+					break
+				}
+				j++
+			}
+		}
+	}
+	for i:=0; i<numCourses; i++{
+		if len(course[i])>1 || course[i][0] != -1{
+			return false
+		}
+	}
+	return true
+}
+
+func uniquePaths(m int, n int) int {
+	dp:=make([][]int, m)
+	for i:=0; i<m; i++ {
+		dp[i] = make([]int, n)
+		dp[0][0] = 1
+		for j:=0; j<n; j++{
+			if i == 0 && j == 0{
+				continue
+			}
+			if i == 0{
+				dp[i][j] = dp[i][j-1]
+			}else if j == 0{
+				dp[i][j] = dp[i-1][j]
+			}else{
+				dp[i][j] = dp[i-1][j]+dp[i][j-1]
+			}
+		}
+	}
+	return dp[m-1][n-1]
+}
+
+func maximumSwap(num int) int {
+	temp := []byte(strconv.Itoa(num))
+	maxStack := make([]map[string]int, len(temp))
+
+	maxi := len(temp) - 1
+	max := temp[maxi]
+	maxStack[maxi] = make(map[string]int)
+	maxStack[maxi]["val"] = int(max) - int('0')
+	maxStack[maxi]["key"] = maxi
+
+	for i := len(temp) - 2; i >= 0; i-- {
+		maxStack[i] = make(map[string]int)
+		if temp[i] > max {
+			maxStack[i]["val"] = int(temp[i] - '0')
+			maxStack[i]["key"] = i
+			max = temp[i]
+		} else {
+			maxStack[i]["val"] = maxStack[i+1]["val"]
+			maxStack[i]["key"] = maxStack[i+1]["key"]
+		}
+	}
+	fmt.Println(maxStack)
+	for i := 0; i < len(temp); i++ {
+		if int(temp[i]-'0') < maxStack[i]["val"] {
+			tp := temp[i]
+			temp[i] = uint8(maxStack[i]["val"]) + '0'
+			temp[maxStack[i]["key"]] = tp
+			break
+		}
+	}
+	ans, _ := strconv.Atoi(string(temp))
+	return ans
+	//fmt.Println(string(temp))
+
+}
+
+type NumArray struct {
+	Cache       []int
+	UpdateCache []int
+}
+
+func Constructor(nums []int) NumArray {
+	NA := NumArray{}
+	if len(nums) == 0 {
+		return NA
+	}
+	NA.UpdateCache = make([]int, len(nums))
+	NA.Cache = make([]int, len(nums))
+	NA.Cache[0] = nums[0]
+	for i := 1; i < len(nums); i++ {
+		NA.Cache[i] = NA.Cache[i-1] + nums[i]
+	}
+	return NA
+}
+
+func (this *NumArray) Update(i int, val int) {
+	if len(this.Cache) == 0 {
+		return
+	}
+	var diff int
+	if i != 0 {
+		diff = this.Cache[i] - this.Cache[i-1] - val
+	} else {
+		diff = this.Cache[i] - val
+	}
+	this.UpdateCache[i] = val
+	for k := i; k < len(this.Cache); k++ {
+		this.Cache[k] = this.Cache[k] - diff
+	}
+}
+
+func (this *NumArray) SumRange(i int, j int) int {
+	if len(this.Cache) == 0 {
+		return 0
+	}
+	if i == 0 {
+		return this.Cache[j]
+	} else {
+		return this.Cache[j] - this.Cache[i]
+	}
+}
+
+/**
+ * Your NumArray object will be instantiated and called as such:
+ * obj := Constructor(nums);
+ * obj.Update(i,val);
+ * param_2 := obj.SumRange(i,j);
+ */
+
+type NumMatrix struct {
+	Cache [][]int
+}
+
+//func Constructor(matrix [][]int) NumMatrix {
+//	NM:=NumMatrix{}
+//	NM.Cache = make([][]int, len(matrix))
+//	for i:=0; i<len(matrix); i++{
+//		NM.Cache[i] = make([]int, len(matrix[0]))
+//		NM.Cache[0][0] = matrix[0][0]
+//		for j:=0; j<len(matrix[0]); j++{
+//			if i==0 && j==0{
+//				continue
+//			}
+//			if i==0{
+//				NM.Cache[i][j] = NM.Cache[i][j-1]+matrix[i][j]
+//			}else if j==0{
+//				NM.Cache[i][j] = NM.Cache[i-1][j]+matrix[i][j]
+//			}else{
+//				NM.Cache[i][j] = NM.Cache[i-1][j]+NM.Cache[i][j-1]-NM.Cache[i-1][j-1]+matrix[i][j]
+//			}
+//		}
+//	}
+//	return NM
+//}
+
+func (this *NumMatrix) SumRegion(row1 int, col1 int, row2 int, col2 int) int {
+	if row1 == 0 && col1 == 0 {
+		return this.Cache[row2][col2]
+	}
+	if row1 == 0 {
+		return this.Cache[row2][col2] - this.Cache[row2][col1-1]
+	}
+	if col1 == 0 {
+		return this.Cache[row2][col2] - this.Cache[row1-1][col2]
+	}
+	return this.Cache[row2][col2] - this.Cache[row2][col1-1] - this.Cache[row1-1][col2] + this.Cache[row1-1][col1-1]
+}
+
+/**
+ * Your NumMatrix object will be instantiated and called as such:
+ * obj := Constructor(matrix);
+ * param_1 := obj.SumRegion(row1,col1,row2,col2);
+ */
+
+func matrixScore(A [][]int) int {
+	for i := 0; i < len(A); i++ {
+		if A[i][0] == 0 {
+			for j := 0; j < len(A[i]); j++ {
+				A[i][j] = 1 - A[i][j]
+			}
+		}
+	}
+
+	for j := 0; j < len(A[0]); j++ {
+		count1, count0 := 0, 0
+		for i := 0; i < len(A); i++ {
+			if A[i][j] == 1 {
+				count1++
+			} else {
+				count0++
+			}
+		}
+		if count0 > count1 {
+			for i := 0; i < len(A); i++ {
+				A[i][j] = 1 - A[i][j]
+			}
+		}
+	}
+	count := 0
+	for i := 0; i < len(A); i++ {
+		carry := 0.0
+		for j := len(A[i]) - 1; j >= 0; j-- {
+			count += A[i][j] * int(math.Pow(2.0, carry))
+			carry++
+		}
+	}
+	return count
+}
+
+func getHint(secret string, guess string) string {
+	secretChar := []byte(secret)
+	guessChar := []byte(guess)
+	Bull, Cow := 0, 0
+	numTableS := make([]int, 10)
+	numTableG := make([]int, 10)
+	for i := 0; i < len(secretChar); i++ {
+		if secretChar[i] == guessChar[i] {
+			Bull++
+			Cow--
+		}
+		numTableG[int(guessChar[i])-int('0')]++
+		numTableS[int(secretChar[i])-int('0')]++
+	}
+	for i := 0; i <= 9; i++ {
+		if numTableS[i] < numTableG[i] {
+			Cow += numTableS[i]
+		} else {
+			Cow += numTableG[i]
+		}
+	}
+	return strconv.Itoa(Bull) + "A" + strconv.Itoa(Cow) + "B"
+}
+
+func gameOfLife(board [][]int) {
+	for i := 0; i < len(board); i++ {
+		for j := 0; j < len(board[i]); j++ {
+			trans(board, i, j)
+		}
+	}
+	for i := 0; i < len(board); i++ {
+		for j := 0; j < len(board[i]); j++ {
+			if board[i][j] == 3 {
+				board[i][j] = 0
+			}
+			if board[i][j] == 2 {
+				board[i][j] = 1
+			}
+		}
+	}
+	fmt.Println(board)
+}
+
+func trans(board [][]int, I, J int) {
+	count0, count1 := 0, 0
+	for i := I - 1; i <= I+1; i++ {
+		if i < 0 || i >= len(board) {
+			continue
+		}
+		for j := J - 1; j <= J+1; j++ {
+			if j < 0 || j >= len(board[I]) {
+				continue
+			}
+			if i == I && j == J {
+				continue
+			}
+			if board[i][j] == 0 || board[i][j] == 2 {
+				count0++
+			} else {
+				count1++
+			}
+		}
+	}
+	if board[I][J] == 1 {
+		if count1 < 2 || count1 > 3 {
+			board[I][J] = 3
+		}
+	}
+	if board[I][J] == 0 {
+		if count1 == 3 {
+			board[I][J] = 2
+		}
+	}
+}
+
+type Iterator struct {
+}
+
+func (this *Iterator) hasNext() bool {
+	return true
+}
+
+func (this *Iterator) next() int {
+	return 1
+}
+
+type PeekingIterator struct {
+	Iter      *Iterator
+	NextCache []int
+}
+
+//func Constructor(iter *Iterator) *PeekingIterator {
+//	PeekIter:=PeekingIterator{
+//		Iter:iter,
+//		NextCache: make([]int,0),
+//	}
+//	return &PeekIter
+//}
+
+func (this *PeekingIterator) hasNext() bool {
+	return len(this.NextCache) > 0 || this.Iter.hasNext()
+}
+
+func (this *PeekingIterator) next() int {
+	if len(this.NextCache) > 0 {
+		nt := this.NextCache[0]
+		this.NextCache = this.NextCache[1:]
+		return nt
+	} else {
+		return this.Iter.next()
+	}
+}
+
+func (this *PeekingIterator) peek() int {
+	if len(this.NextCache) > 0 {
+		return this.NextCache[0]
+	} else {
+		nt := this.Iter.next()
+		this.NextCache = append(this.NextCache, nt)
+		return nt
+	}
+}
+
+func nthUglyNumber(n int) int {
+	var (
+		n2 = 0
+		n3 = 0
+		n5 = 0
+		dp = make([]int, n+1)
+	)
+	dp[0] = 1
+	for i := 1; i < n; i++ {
+		dp[i] = min(dp[n2]*2, dp[n3]*3, dp[n5]*5)
+		if dp[i] == dp[n2]*2 {
+			n2++
+		}
+		if dp[i] == dp[n3]*3 {
+			n3++
+		}
+		if dp[i] == dp[n5]*5 {
+			n5++
+		}
+	}
+	return dp[n-1]
+}
+func hIndex(citations []int) int {
+	sort.Ints(citations)
+	maxH := 0
+	for i := len(citations) - 1; i >= 0; i-- {
+		if len(citations)-i > maxH && citations[i] > maxH {
+			maxH = min(len(citations)-i, citations[i])
+		}
+	}
+	return maxH
+}
+
+func min(a ...int) int {
+	if len(a) <= 0 {
+		panic("ERROR")
+	}
+	m := a[0]
+	for i := 0; i < len(a); i++ {
+		if m > a[i] {
+			m = a[i]
+		}
+	}
+	return m
 }
 
 type topNode struct {

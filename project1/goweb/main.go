@@ -28,6 +28,7 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("val: ", strings.Join(v, ""))
 	}
 	fmt.Fprintf(w, "hello, astaxie!")
+	fmt.Printf(math.pi)
 }
 
 func login(w http.ResponseWriter, r *http.Request) {

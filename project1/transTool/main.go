@@ -60,7 +60,11 @@ func main() {
 	var res RESPONSE
 	json.Unmarshal(robots, &res)
 	ans := []byte(res.Trans_result[0]["dst"])
-	ioutil.WriteFile(file, ans, os.ModeAppend)
+
+	goalFile := "./files/goalFile.txt"
+	ioPtr, _ := os.OpenFile(goalFile, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	fmt.Fprintf(ioPtr, string(ans)+"\n \n"+"\n \n")
+	ioPtr.Close()
 }
 
 func HTTPparam2str(params map[string]string) string {
